@@ -1,0 +1,2109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cartas para mi amor</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&family=Special+Elite&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cream: #f5f0e8;
+    --cream-dark: #ede6d4;
+    --ink: #2c1f0e;
+    --ink-light: #5c4a32;
+    --ink-faint: #9c8870;
+    --rose: #c4736a;
+    --rose-light: #e8b4ae;
+    --rose-faint: #f5e6e4;
+    --gold: #b8974a;
+    --gold-light: #e8d8a8;
+    --paper-shadow: rgba(44,31,14,0.12);
+  }
+
+  body {
+    background: var(--cream-dark);
+    font-family: 'Cormorant Garamond', serif;
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.6;
+  }
+
+  .view { display: none; min-height: 100vh; }
+  .view.active { display: block; }
+
+  /* ============ READER VIEW ============ */
+  #reader {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 3rem 1rem 4rem;
+    background: radial-gradient(ellipse at 50% 0%, #e8dcc8 0%, var(--cream-dark) 60%);
+    min-height: 100vh;
+  }
+  #reader.active { display: flex; }
+
+  .reader-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    animation: fadeDown 0.8s ease both;
+  }
+
+  .reader-header .eyebrow {
+    font-family: 'Special Elite', monospace;
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 0.5rem;
+  }
+
+  .reader-header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 6vw, 3.2rem);
+    font-weight: 400;
+    font-style: italic;
+    color: var(--ink);
+    line-height: 1.1;
+  }
+
+  .reader-header .subtitle {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    color: var(--ink-faint);
+    margin-top: 0.4rem;
+    font-style: italic;
+  }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0.8rem auto;
+    width: fit-content;
+  }
+
+  .divider::before, .divider::after {
+    content: '';
+    width: 40px;
+    height: 0.5px;
+    background: var(--gold);
+  }
+
+  .divider-rose { font-size: 14px; color: var(--rose); }
+
+  .envelope-wrap {
+    width: 100%;
+    max-width: 560px;
+    animation: fadeUp 0.9s ease both 0.2s;
+  }
+
+  .envelope {
+    background: var(--cream);
+    border: 1px solid var(--gold-light);
+    border-radius: 4px;
+    box-shadow: 0 8px 40px var(--paper-shadow), 0 2px 8px rgba(184,151,74,0.1);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .envelope:hover { transform: translateY(-3px); box-shadow: 0 14px 50px var(--paper-shadow); }
+
+  .envelope-flap {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 120px;
+    background: linear-gradient(170deg, var(--cream-dark) 0%, var(--cream) 100%);
+    clip-path: polygon(0 0, 100% 0, 50% 62%);
+    border-bottom: 1px solid var(--gold-light);
+    z-index: 2;
+  }
+
+  .envelope-seal {
+    position: absolute;
+    top: 42px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3;
+    filter: drop-shadow(0 2px 6px rgba(196,115,106,0.5));
+  }
+
+  .envelope-body {
+    padding: 7rem 2.5rem 2.5rem;
+    text-align: center;
+  }
+
+  .envelope-date {
+    font-family: 'Special Elite', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  .envelope-hint {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    color: var(--ink-light);
+    font-size: 1.1rem;
+  }
+
+  .letter-paper {
+    display: none;
+    max-width: 560px;
+    width: 100%;
+    margin-top: 1.5rem;
+    animation: unfold 0.6s ease both;
+  }
+
+  .letter-paper.open { display: block; }
+
+  @keyframes unfold {
+    from { opacity: 0; transform: scaleY(0.3) translateY(-40px); transform-origin: top; }
+    to { opacity: 1; transform: scaleY(1) translateY(0); }
+  }
+
+  .paper {
+    background: var(--cream);
+    border: 1px solid var(--gold-light);
+    border-radius: 2px;
+    padding: 3rem 3rem 3.5rem;
+    box-shadow: 0 4px 20px var(--paper-shadow);
+    position: relative;
+  }
+
+  .paper::before {
+    content: '';
+    position: absolute;
+    left: 72px;
+    top: 0; bottom: 0;
+    width: 1px;
+    background: var(--rose-light);
+    opacity: 0.5;
+  }
+
+  .paper-lines {
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+      transparent,
+      transparent 31px,
+      rgba(184,151,74,0.08) 31px,
+      rgba(184,151,74,0.08) 32px
+    );
+    pointer-events: none;
+  }
+
+  .letter-date-line {
+    font-family: 'Special Elite', monospace;
+    font-size: 11px;
+    color: var(--ink-faint);
+    letter-spacing: 2px;
+    text-align: right;
+    margin-bottom: 1.8rem;
+    position: relative;
+  }
+
+  .letter-salutation {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-style: italic;
+    color: var(--rose);
+    margin-bottom: 1.4rem;
+    position: relative;
+  }
+
+  .letter-body {
+    font-family: 'IM Fell English', serif;
+    font-size: 1.1rem;
+    line-height: 2;
+    color: var(--ink);
+    position: relative;
+    white-space: pre-wrap;
+  }
+
+  .letter-closing {
+    margin-top: 2rem;
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    color: var(--ink-light);
+    font-size: 1.1rem;
+    position: relative;
+  }
+
+  .letter-signature {
+    margin-top: 0.5rem;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-style: italic;
+    color: var(--rose);
+    position: relative;
+    display: inline-block;
+    padding-bottom: 4px;
+  }
+
+  .letter-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 1.5rem;
+    max-width: 560px;
+    width: 100%;
+  }
+
+  .nav-btn {
+    font-family: 'Special Elite', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    background: none;
+    border: 0.5px solid var(--gold-light);
+    padding: 8px 16px;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .nav-btn:hover { color: var(--ink); border-color: var(--gold); background: rgba(184,151,74,0.05); }
+  .nav-btn:disabled { opacity: 0.3; cursor: default; }
+
+  .nav-count {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 0.9rem;
+    color: var(--ink-faint);
+  }
+
+  /* ============ ADMIN VIEW ============ */
+  #admin {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 1rem 4rem;
+    min-height: 100vh;
+    background: var(--cream-dark);
+  }
+  #admin.active { display: flex; }
+
+  .admin-header {
+    width: 100%;
+    max-width: 700px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+  }
+
+  .admin-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-style: italic;
+    color: var(--ink);
+  }
+
+  .btn-back {
+    font-family: 'Special Elite', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    background: none;
+    border: 0.5px solid var(--ink-faint);
+    color: var(--ink-faint);
+    padding: 6px 12px;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.2s;
+  }
+  .btn-back:hover { color: var(--ink); border-color: var(--ink); }
+
+  .admin-panel {
+    width: 100%;
+    max-width: 700px;
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  .panel-card {
+    background: var(--cream);
+    border: 1px solid var(--gold-light);
+    border-radius: 4px;
+    padding: 1.8rem;
+    box-shadow: 0 2px 12px var(--paper-shadow);
+  }
+
+  .panel-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-style: italic;
+    color: var(--ink);
+    margin-bottom: 1rem;
+    padding-bottom: 0.7rem;
+    border-bottom: 0.5px solid var(--gold-light);
+  }
+
+  .field-row { margin-bottom: 1rem; }
+
+  .field-row label {
+    display: block;
+    font-family: 'Special Elite', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 6px;
+  }
+
+  .field-row input, .field-row textarea, .field-row select {
+    width: 100%;
+    background: var(--cream-dark);
+    border: 0.5px solid var(--gold-light);
+    border-radius: 2px;
+    padding: 10px 14px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.05rem;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s;
+    resize: vertical;
+  }
+
+  .field-row input:focus, .field-row textarea:focus {
+    border-color: var(--rose);
+    background: var(--rose-faint);
+  }
+
+  .field-row textarea { min-height: 140px; line-height: 1.7; }
+
+  .ai-tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+  }
+
+  .ai-tab {
+    font-family: 'Special Elite', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    background: var(--cream-dark);
+    border: 0.5px solid var(--gold-light);
+    color: var(--ink-light);
+    padding: 6px 14px;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .ai-tab:hover, .ai-tab.active { background: var(--rose); color: white; border-color: var(--rose); }
+
+  .ai-prompt-area { margin-bottom: 1rem; }
+
+  .ai-prompt-area input {
+    width: 100%;
+    background: var(--cream-dark);
+    border: 0.5px solid var(--gold-light);
+    border-radius: 2px;
+    padding: 10px 14px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    color: var(--ink);
+    outline: none;
+  }
+
+  .ai-prompt-area input:focus { border-color: var(--rose); background: var(--rose-faint); }
+
+  .btn-ai {
+    font-family: 'Special Elite', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    background: var(--rose);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 100%;
+  }
+
+  .btn-ai:hover { background: #b5635a; }
+  .btn-ai:disabled { opacity: 0.5; cursor: default; }
+
+  .ai-response {
+    display: none;
+    margin-top: 1rem;
+    background: var(--rose-faint);
+    border: 0.5px solid var(--rose-light);
+    border-radius: 2px;
+    padding: 1rem 1.2rem;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    color: var(--ink);
+    line-height: 1.7;
+    white-space: pre-wrap;
+  }
+
+  .ai-response.visible { display: block; }
+
+  .btn-use-suggestion {
+    margin-top: 0.8rem;
+    font-family: 'Special Elite', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    background: none;
+    border: 0.5px solid var(--rose);
+    color: var(--rose);
+    padding: 6px 14px;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-use-suggestion:hover { background: var(--rose); color: white; }
+
+  .letter-item-del {
+    background: none;
+    border: none;
+    color: var(--rose-light);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 2px 6px;
+    transition: color 0.2s;
+  }
+
+  .letter-item-del:hover { color: var(--rose); }
+
+  .btn-save {
+    width: 100%;
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.1rem;
+    background: var(--ink);
+    color: var(--cream);
+    border: none;
+    padding: 14px;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 0.5rem;
+  }
+
+  .btn-save:hover { background: var(--rose); }
+
+  /* LOGIN */
+  #login-screen {
+    position: fixed;
+    inset: 0;
+    background: var(--cream-dark);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 500;
+    transition: opacity 0.4s ease;
+  }
+
+  #login-screen.hidden { opacity: 0; pointer-events: none; }
+
+  .login-box {
+    background: var(--cream);
+    border: 1px solid var(--gold-light);
+    border-radius: 4px;
+    padding: 2.5rem;
+    width: 300px;
+    box-shadow: 0 8px 40px var(--paper-shadow);
+    text-align: center;
+  }
+
+  .login-box h2 {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.4rem;
+    color: var(--ink);
+    margin-bottom: 0.4rem;
+  }
+
+  .login-box p {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 0.95rem;
+    color: var(--ink-faint);
+    margin-bottom: 1.5rem;
+  }
+
+  .login-box input {
+    width: 100%;
+    background: var(--cream-dark);
+    border: 0.5px solid var(--gold-light);
+    border-radius: 2px;
+    padding: 10px 14px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    color: var(--ink);
+    text-align: center;
+    letter-spacing: 4px;
+    outline: none;
+    margin-bottom: 1rem;
+  }
+
+  .login-box input:focus { border-color: var(--rose); }
+
+  .login-box button {
+    width: 100%;
+    background: var(--rose);
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 2px;
+    font-family: 'Special Elite', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .login-box button:hover { background: #b5635a; }
+
+  .login-err {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 0.85rem;
+    color: var(--rose);
+    margin-top: 0.5rem;
+    min-height: 1.2rem;
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--ink);
+    color: var(--cream);
+    font-family: 'Special Elite', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 12px 24px;
+    border-radius: 2px;
+    transition: transform 0.4s ease;
+    z-index: 999;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  .secret-zone {
+    position: fixed;
+    bottom: 0; right: 0;
+    width: 60px; height: 60px;
+    cursor: default;
+    z-index: 100;
+  }
+
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .rose-deco {
+    position: fixed;
+    pointer-events: none;
+    opacity: 0.07;
+    font-size: 120px;
+    user-select: none;
+  }
+
+  .rose-deco.tl { top: -20px; left: -20px; transform: rotate(-20deg); }
+  .rose-deco.br { bottom: -20px; right: -20px; transform: rotate(160deg); }
+
+  /* ============ LETTER SELECTOR ============ */
+  .btn-ver-todas {
+    font-family: 'Special Elite', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    background: none;
+    border: 0.5px solid var(--rose-light);
+    color: var(--rose);
+    padding: 7px 18px;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-ver-todas:hover { background: var(--rose-faint); border-color: var(--rose); }
+
+  #letter-selector {
+    position: fixed;
+    inset: 0;
+    z-index: 400;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .selector-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(44,31,14,0.55);
+  }
+
+  .selector-panel {
+    position: relative;
+    background: var(--cream);
+    border: 1px solid var(--gold-light);
+    border-radius: 4px;
+    box-shadow: 0 12px 50px var(--paper-shadow);
+    width: 90%;
+    max-width: 480px;
+    max-height: 70vh;
+    display: flex;
+    flex-direction: column;
+    animation: fadeUp 0.3s ease both;
+  }
+
+  .selector-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.2rem 1.5rem;
+    border-bottom: 0.5px solid var(--gold-light);
+    flex-shrink: 0;
+  }
+
+  .selector-title {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.2rem;
+    color: var(--ink);
+  }
+
+  .selector-close {
+    background: none;
+    border: none;
+    color: var(--ink-faint);
+    font-size: 14px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 2px;
+    transition: color 0.2s;
+  }
+  .selector-close:hover { color: var(--ink); }
+
+  .selector-list {
+    overflow-y: auto;
+    padding: 0.5rem 0;
+    flex: 1;
+    will-change: transform;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .flores-bg {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ============ ACORDEON POR MESES ============ */
+  .acc { --acc-pad: 1.5rem; }
+  .acc.acc-inline { --acc-pad: 0rem; }
+
+  .month-group { border-bottom: 0.5px solid rgba(184,151,74,0.18); }
+  .month-group:last-child { border-bottom: none; }
+
+  .month-head {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px var(--acc-pad);
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.05rem;
+    color: var(--ink);
+    transition: background 0.2s;
+  }
+  .month-head:hover { background: rgba(184,151,74,0.07); }
+  .month-head:focus-visible { outline: 1px solid var(--rose); outline-offset: -2px; }
+
+  .month-caret {
+    font-family: 'Special Elite', monospace;
+    font-size: 13px;
+    line-height: 1;
+    color: var(--ink-faint);
+    flex-shrink: 0;
+    transition: transform 0.25s cubic-bezier(0.16,1,0.3,1);
+  }
+  .month-group.open .month-caret { transform: rotate(90deg); }
+
+  .month-name { flex: 1; }
+  .month-name::first-letter { text-transform: uppercase; }
+
+  .month-count {
+    font-family: 'Special Elite', monospace;
+    font-size: 9.5px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    flex-shrink: 0;
+  }
+
+  .month-body { display: none; padding-bottom: 6px; }
+  .month-group.open .month-body { display: block; }
+
+  .sel-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 9px var(--acc-pad) 9px calc(var(--acc-pad) + 1.1rem);
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s;
+  }
+  .sel-item:hover { background: var(--rose-faint); }
+  .sel-item.current { background: rgba(184,151,74,0.1); }
+
+  .sel-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+  .sel-main:focus-visible { outline: 1px solid var(--rose); outline-offset: 3px; }
+
+  .sel-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--rose);
+    flex-shrink: 0;
+    opacity: 0;
+  }
+  .sel-item.current .sel-dot { opacity: 1; }
+
+  .sel-date {
+    font-family: 'Special Elite', monospace;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .sel-preview {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    color: var(--ink-light);
+    font-size: 0.9rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* dias con mas de una carta */
+  .day-multi { padding: 2px 0 6px; }
+
+  .day-multi-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px var(--acc-pad) 2px calc(var(--acc-pad) + 1.1rem);
+  }
+
+  .day-multi-date {
+    font-family: 'Special Elite', monospace;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .day-badge {
+    font-family: 'Special Elite', monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--rose);
+    border: 0.5px solid var(--rose-light);
+    background: var(--rose-faint);
+    border-radius: 2px;
+    padding: 2px 7px;
+  }
+
+  .day-multi .sel-item { padding-left: calc(var(--acc-pad) + 2.2rem); }
+
+  .sel-ord {
+    font-family: 'Special Elite', monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    flex-shrink: 0;
+  }
+
+  .acc-empty {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    color: var(--ink-faint);
+    font-size: 0.9rem;
+    padding: 12px var(--acc-pad);
+  }
+
+  /* ============ CIERRE Y FIRMA (entran al final) ============ */
+  .letter-outro {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.9s ease, transform 0.9s cubic-bezier(0.16,1,0.3,1);
+  }
+  .letter-outro.in { opacity: 1; transform: translateY(0); }
+
+  .letter-signature::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 1px;
+    width: 100%;
+    background: var(--rose-light);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 1.1s cubic-bezier(0.16,1,0.3,1) 0.3s;
+  }
+  .letter-signature.in::after { transform: scaleX(1); }
+
+  .skip-hint {
+    font-family: 'Special Elite', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    text-align: center;
+    margin-top: 0.8rem;
+    opacity: 0.75;
+    transition: opacity 0.4s ease;
+  }
+  .skip-hint.gone { opacity: 0; pointer-events: none; }
+
+  /* ============ VARIAS CARTAS EN UN DIA (lector) ============ */
+  .day-pills {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 1.2rem;
+  }
+  .day-pills.visible { display: flex; }
+
+  .day-pills-label {
+    font-family: 'Special Elite', monospace;
+    font-size: 9.5px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .day-pill {
+    min-width: 30px;
+    height: 30px;
+    padding: 0 8px;
+    border-radius: 2px;
+    border: 0.5px solid var(--gold-light);
+    background: var(--cream);
+    color: var(--ink-light);
+    font-family: 'Special Elite', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .day-pill:hover { border-color: var(--rose); color: var(--rose); }
+  .day-pill.active {
+    background: var(--rose);
+    border-color: var(--rose);
+    color: #fff;
+  }
+
+  .env-multi {
+    font-family: 'Special Elite', monospace;
+    font-size: 9.5px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--rose);
+    margin-top: 0.8rem;
+  }
+
+  .reader-empty {
+    max-width: 560px;
+    text-align: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 1.05rem;
+    color: var(--ink-light);
+    background: var(--cream);
+    border: 1px solid var(--gold-light);
+    border-radius: 4px;
+    padding: 2.5rem 2rem;
+  }
+
+  /* ============ FECHA DESTINO (admin) ============ */
+  .dt-static {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.05rem;
+    color: var(--ink);
+  }
+
+  .dt-opts {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 0.7rem;
+  }
+
+  .dt-opt {
+    font-family: 'Special Elite', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    background: var(--cream-dark);
+    border: 0.5px solid var(--gold-light);
+    color: var(--ink-light);
+    padding: 8px 14px;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .dt-opt:hover { border-color: var(--rose); color: var(--rose); }
+  .dt-opt.active {
+    background: var(--rose);
+    border-color: var(--rose);
+    color: #fff;
+  }
+
+  .dt-alert {
+    display: none;
+    background: var(--rose-faint);
+    border-left: 2px solid var(--rose);
+    border-radius: 0 2px 2px 0;
+    padding: 0.8rem 1rem;
+    margin-bottom: 1rem;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    font-style: italic;
+    color: #8a3f38;
+    line-height: 1.5;
+  }
+  .dt-alert.visible { display: block; }
+
+  .dt-change {
+    font-family: 'Special Elite', monospace;
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    background: none;
+    border: none;
+    border-bottom: 0.5px solid var(--ink-faint);
+    color: var(--ink-faint);
+    padding: 2px 0;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+  .dt-change:hover { color: var(--rose); border-color: var(--rose); }
+
+  .dt-custom { display: none; margin-top: 0.7rem; }
+  .dt-custom.visible { display: block; }
+
+  .edit-banner {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    background: rgba(184,151,74,0.1);
+    border: 0.5px solid var(--gold-light);
+    border-radius: 2px;
+    padding: 0.7rem 1rem;
+    margin-bottom: 1.2rem;
+  }
+  .edit-banner.visible { display: flex; }
+
+  .edit-banner-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 1rem;
+    color: var(--ink);
+  }
+
+  .btn-cancel-edit {
+    font-family: 'Special Elite', monospace;
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    background: none;
+    border: 0.5px solid var(--ink-faint);
+    color: var(--ink-faint);
+    padding: 5px 12px;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-cancel-edit:hover { color: var(--ink); border-color: var(--ink); }
+
+  .letter-item-del.armed {
+    color: var(--rose);
+    font-family: 'Special Elite', monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* ============ MOVIL ============ */
+  @media (max-width: 640px) {
+    #reader { padding: 2rem 0.8rem 3rem; }
+    .paper { padding: 2rem 1.4rem 2.4rem; }
+    .paper::before { left: 34px; }
+    .envelope-body { padding: 6rem 1.2rem 2rem; }
+    .letter-body { font-size: 1.05rem; line-height: 1.9; }
+    .selector-panel { width: 94%; max-height: 78vh; }
+    .acc { --acc-pad: 1rem; }
+    .nav-btn { padding: 8px 11px; font-size: 10px; }
+    #admin { padding: 1.5rem 0.8rem 3rem; }
+    .panel-card { padding: 1.2rem; }
+    .admin-header { flex-wrap: wrap; gap: 0.6rem; }
+    .rose-deco { font-size: 80px; }
+  }
+
+  /* ============ MOVIMIENTO REDUCIDO ============ */
+  @media (prefers-reduced-motion: reduce) {
+    .reader-header, .envelope-wrap, .letter-paper, .selector-panel {
+      animation: none !important;
+    }
+    .letter-outro, .letter-signature::after, .month-caret, .envelope {
+      transition: none !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="rose-deco tl">❧</div>
+<div class="rose-deco br">❧</div>
+
+<!-- FLORES DECORATIVAS DE FONDO -->
+<svg class="flores-bg" viewBox="0 0 400 900" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+  <g opacity="0.07" fill="#8a7355">
+
+    <!-- ROSA esquina superior izquierda -->
+    <g transform="translate(30,60) rotate(-15)">
+      <ellipse cx="0" cy="-28" rx="11" ry="18"/>
+      <ellipse cx="14" cy="-20" rx="10" ry="16" transform="rotate(35)"/>
+      <ellipse cx="-14" cy="-20" rx="10" ry="16" transform="rotate(-35)"/>
+      <ellipse cx="20" cy="-5" rx="9" ry="15" transform="rotate(65)"/>
+      <ellipse cx="-20" cy="-5" rx="9" ry="15" transform="rotate(-65)"/>
+      <ellipse cx="0" cy="-10" rx="8" ry="12"/>
+      <rect x="-2" y="0" width="4" height="50" rx="2"/>
+      <ellipse cx="-18" cy="22" rx="14" ry="8" transform="rotate(-30)"/>
+      <ellipse cx="18" cy="28" rx="14" ry="8" transform="rotate(25)"/>
+    </g>
+
+    <!-- TULIPÁN derecha arriba -->
+    <g transform="translate(370,100) rotate(10)">
+      <path d="M0,-60 C-18,-60 -22,-30 -22,-10 C-22,10 -10,22 0,22 C10,22 22,10 22,-10 C22,-30 18,-60 0,-60Z"/>
+      <path d="M0,-55 C-28,-45 -30,-15 -22,-5"/>
+      <path d="M0,-55 C28,-45 30,-15 22,-5"/>
+      <rect x="-2" y="22" width="4" height="55" rx="2"/>
+      <ellipse cx="-20" cy="55" rx="16" ry="7" transform="rotate(-25)"/>
+    </g>
+
+    <!-- CALLA LILY izquierda media -->
+    <g transform="translate(20,280) rotate(5)">
+      <path d="M0,0 C-30,-20 -35,-60 -10,-80 C0,-88 10,-88 20,-80 C45,-60 40,-20 10,0 C5,3 -5,3 0,0Z"/>
+      <line x1="0" y1="0" x2="0" y2="-75" stroke="#8a7355" stroke-width="3"/>
+      <rect x="-2" y="0" width="4" height="65" rx="2"/>
+      <ellipse cx="-22" cy="38" rx="18" ry="7" transform="rotate(-20)"/>
+      <ellipse cx="22" cy="50" rx="18" ry="7" transform="rotate(15)"/>
+    </g>
+
+    <!-- PEONÍA derecha media -->
+    <g transform="translate(375,310) rotate(-8)">
+      <circle cx="0" cy="-20" r="22"/>
+      <ellipse cx="0" cy="-20" rx="16" ry="20"/>
+      <ellipse cx="12" cy="-28" rx="13" ry="17" transform="rotate(30 12 -28)"/>
+      <ellipse cx="-12" cy="-28" rx="13" ry="17" transform="rotate(-30 -12 -28)"/>
+      <ellipse cx="18" cy="-14" rx="11" ry="15" transform="rotate(60 18 -14)"/>
+      <ellipse cx="-18" cy="-14" rx="11" ry="15" transform="rotate(-60 -18 -14)"/>
+      <circle cx="0" cy="-20" r="10"/>
+      <circle cx="0" cy="-20" r="5"/>
+      <rect x="-2" y="2" width="4" height="55" rx="2"/>
+      <ellipse cx="20" cy="32" rx="16" ry="7" transform="rotate(20)"/>
+      <ellipse cx="-18" cy="42" rx="16" ry="7" transform="rotate(-15)"/>
+    </g>
+
+    <!-- LIRIO izquierda abajo -->
+    <g transform="translate(45,550) rotate(-5)">
+      <path d="M0,-70 C-8,-50 -25,-30 -30,-10 C-20,-5 -8,-2 0,0 C8,-2 20,-5 30,-10 C25,-30 8,-50 0,-70Z"/>
+      <path d="M0,-70 C-30,-55 -40,-25 -30,-10"/>
+      <path d="M0,-70 C30,-55 40,-25 30,-10"/>
+      <ellipse cx="-35" cy="-45" rx="12" ry="22" transform="rotate(-40 -35 -45)"/>
+      <ellipse cx="35" cy="-45" rx="12" ry="22" transform="rotate(40 35 -45)"/>
+      <ellipse cx="-20" cy="-68" rx="10" ry="20" transform="rotate(-15 -20 -68)"/>
+      <ellipse cx="20" cy="-68" rx="10" ry="20" transform="rotate(15 20 -68)"/>
+      <rect x="-2" y="0" width="4" height="65" rx="2"/>
+      <ellipse cx="-22" cy="35" rx="18" ry="7" transform="rotate(-25)"/>
+    </g>
+
+    <!-- RANÚNCULO derecha abajo -->
+    <g transform="translate(365,520) rotate(12)">
+      <circle cx="0" cy="-18" r="20"/>
+      <ellipse cx="0" cy="-18" rx="14" ry="18"/>
+      <ellipse cx="10" cy="-25" rx="12" ry="16" transform="rotate(25 10 -25)"/>
+      <ellipse cx="-10" cy="-25" rx="12" ry="16" transform="rotate(-25 -10 -25)"/>
+      <ellipse cx="16" cy="-12" rx="10" ry="14" transform="rotate(55 16 -12)"/>
+      <ellipse cx="-16" cy="-12" rx="10" ry="14" transform="rotate(-55 -16 -12)"/>
+      <ellipse cx="0" cy="-30" rx="10" ry="14"/>
+      <circle cx="0" cy="-18" r="8"/>
+      <circle cx="0" cy="-18" r="4"/>
+      <rect x="-2" y="2" width="4" height="50" rx="2"/>
+      <ellipse cx="-18" cy="30" rx="15" ry="6" transform="rotate(-20)"/>
+    </g>
+
+    <!-- ANTHURIO izquierda muy abajo -->
+    <g transform="translate(55,760) rotate(8)">
+      <path d="M0,0 C-40,-10 -50,-45 -30,-65 C-15,-80 15,-80 30,-65 C50,-45 40,-10 0,0Z"/>
+      <path d="M0,0 C0,-20 0,-50 0,-70" stroke="#8a7355" stroke-width="3" fill="none"/>
+      <line x1="0" y1="-30" x2="0" y2="-68" stroke="#8a7355" stroke-width="3.5"/>
+      <rect x="-2" y="0" width="4" height="60" rx="2"/>
+      <ellipse cx="24" cy="38" rx="18" ry="7" transform="rotate(18)"/>
+      <ellipse cx="-20" cy="50" rx="16" ry="7" transform="rotate(-12)"/>
+    </g>
+
+    <!-- ROSA pequeña derecha muy abajo -->
+    <g transform="translate(355,750) rotate(-20) scale(0.75)">
+      <ellipse cx="0" cy="-28" rx="11" ry="18"/>
+      <ellipse cx="14" cy="-20" rx="10" ry="16" transform="rotate(35)"/>
+      <ellipse cx="-14" cy="-20" rx="10" ry="16" transform="rotate(-35)"/>
+      <ellipse cx="20" cy="-5" rx="9" ry="15" transform="rotate(65)"/>
+      <ellipse cx="-20" cy="-5" rx="9" ry="15" transform="rotate(-65)"/>
+      <ellipse cx="0" cy="-10" rx="8" ry="12"/>
+      <rect x="-2" y="0" width="4" height="50" rx="2"/>
+      <ellipse cx="-18" cy="22" rx="14" ry="8" transform="rotate(-30)"/>
+      <ellipse cx="18" cy="28" rx="14" ry="8" transform="rotate(25)"/>
+    </g>
+
+    <!-- TULIPÁN pequeño centro arriba -->
+    <g transform="translate(200,30) rotate(0) scale(0.6)">
+      <path d="M0,-60 C-18,-60 -22,-30 -22,-10 C-22,10 -10,22 0,22 C10,22 22,10 22,-10 C22,-30 18,-60 0,-60Z"/>
+      <rect x="-2" y="22" width="4" height="40" rx="2"/>
+    </g>
+
+  </g>
+</svg>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <div class="login-box">
+    <h2>Panel secreto</h2>
+    <p>Solo para quien escribe estas cartas...</p>
+    <input type="password" id="pwd-input" placeholder="••••••" maxlength="20" aria-label="Contraseña del panel">
+    <button onclick="tryLogin()">Entrar</button>
+    <div class="login-err" id="login-err"></div>
+  </div>
+</div>
+
+<!-- READER VIEW -->
+<div id="reader" class="view active">
+  <div class="reader-header">
+    <div class="eyebrow">Una carta</div>
+    <h1>Para mi amorcito</h1>
+    <div class="divider"><div class="divider-rose">✦</div></div>
+    <div class="subtitle">con todo mi amor</div>
+  </div>
+
+  <div class="envelope-wrap">
+    <div class="envelope" id="envelope" role="button" tabindex="0" onclick="openEnvelope()">
+      <div class="envelope-flap"></div>
+      <div class="envelope-seal">
+        <svg viewBox="0 0 44 44" width="44" height="44" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22 38 C22 38 4 26 4 14 C4 8 8.5 4 13.5 4 C17 4 20 6 22 9 C24 6 27 4 30.5 4 C35.5 4 40 8 40 14 C40 26 22 38 22 38Z" fill="#c4736a"/>
+          <text x="22" y="22" text-anchor="middle" dominant-baseline="central" font-family="Playfair Display, serif" font-style="italic" font-size="12" fill="white">S</text>
+        </svg>
+      </div>
+      <div class="envelope-body">
+        <div class="envelope-date" id="env-date">Cargando...</div>
+        <div class="envelope-hint" id="env-hint">Haz clic para abrir tu carta de hoy ✦</div>
+        <div class="env-multi" id="env-multi" style="display:none;"></div>
+      </div>
+    </div>
+
+    <div class="reader-empty" id="reader-empty" style="display:none;"></div>
+
+    <div class="letter-paper" id="letter-paper">
+      <div class="paper" id="paper">
+        <div class="paper-lines"></div>
+        <div class="letter-date-line" id="letter-date"></div>
+        <div class="letter-salutation" id="letter-salutation"></div>
+        <div class="letter-body" id="letter-body"></div>
+        <div class="letter-closing letter-outro" id="letter-closing"></div>
+        <div><span class="letter-signature letter-outro" id="letter-signature"></span></div>
+      </div>
+      <div class="skip-hint" id="skip-hint">Toca la carta para leerla completa</div>
+    </div>
+
+    <div class="day-pills" id="day-pills"></div>
+
+    <div class="letter-nav" id="letter-nav" style="display:none;">
+      <button class="nav-btn" id="btn-prev" onclick="prevLetter()">← Anterior</button>
+      <div class="nav-count" id="nav-count"></div>
+      <button class="nav-btn" id="btn-next" onclick="nextLetter()">Siguiente →</button>
+    </div>
+
+    <div id="ver-todas-wrap" style="display:none; text-align:center; margin-top:1rem;">
+      <button class="btn-ver-todas" onclick="openLetterSelector()">✦ Ver todas las cartas</button>
+    </div>
+  </div>
+</div>
+
+<!-- LETTER SELECTOR MODAL -->
+<div id="letter-selector" style="display:none;">
+  <div class="selector-backdrop" onclick="closeLetterSelector()"></div>
+  <div class="selector-panel">
+    <div class="selector-header">
+      <div class="selector-title">Todas las cartas</div>
+      <button class="selector-close" onclick="closeLetterSelector()">✕</button>
+    </div>
+    <div class="selector-list acc" id="selector-list"></div>
+  </div>
+</div>
+
+<!-- ADMIN VIEW -->
+<div id="admin" class="view">
+  <div class="admin-header">
+    <div class="admin-title">✦ Panel de cartas</div>
+    <button class="btn-back" onclick="goToReader()">← Volver</button>
+  </div>
+
+  <div class="admin-panel">
+
+    <div class="panel-card">
+      <h3 id="write-title">Escribir carta de hoy</h3>
+
+      <div class="edit-banner" id="edit-banner">
+        <div class="edit-banner-text" id="edit-banner-text"></div>
+        <button class="btn-cancel-edit" onclick="cancelEdit()">Cancelar edición</button>
+      </div>
+
+      <div class="dt-alert" id="dt-alert"></div>
+
+      <div class="field-row">
+        <label id="dt-label" for="dt-custom">Esta carta es para</label>
+        <div class="dt-opts" id="dt-opts"></div>
+        <div class="dt-static" id="dt-static"></div>
+        <button class="dt-change" id="dt-change" onclick="toggleCustomDate()">Otra fecha</button>
+        <div class="dt-custom" id="dt-custom-wrap">
+          <input type="date" id="dt-custom" onchange="pickCustomDate(this.value)">
+        </div>
+      </div>
+
+      <div class="field-row">
+        <label for="f-salutation">Saludo</label>
+        <input type="text" id="f-salutation" placeholder="Mi reina hermosa," value="Mi reina hermosa,">
+      </div>
+      <div class="field-row">
+        <label for="f-body">Cuerpo de la carta</label>
+        <textarea id="f-body" placeholder="Escribe tu carta aquí..."></textarea>
+      </div>
+      <div class="field-row">
+        <label for="f-closing">Cierre</label>
+        <input type="text" id="f-closing" placeholder="Con todo mi amor," value="Con todo mi amor,">
+      </div>
+      <div class="field-row">
+        <label for="f-signature">Firma</label>
+        <input type="text" id="f-signature" placeholder="Tu amor" value="Tu amor">
+      </div>
+      <button class="btn-save" id="btn-save" onclick="saveLetter()">Guardar carta ✦</button>
+    </div>
+
+    <div class="panel-card">
+      <h3>Cartas guardadas</h3>
+      <div id="letters-list" class="acc acc-inline"></div>
+    </div>
+
+  </div>
+</div>
+
+<div class="secret-zone" id="secret-zone"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const ADMIN_PASSWORD = "amor";
+const SUPABASE_URL = "https://qdlcmcngnojoobeqkidz.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkbGNtY25nbm9qb29iZXFraWR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1Mzc0MjEsImV4cCI6MjA5MDExMzQyMX0.-RXq4lqU9MdYUD0sbKScPNXPFAusXxiNyH4eNd5rzXk";
+
+const MONTHS = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+let letters = [];
+let currentIdx = 0;
+let secretClicks = 0;
+let secretTimer = null;
+let typewriterGen = 0;
+let finishTypewriter = null;
+let editingId = null;
+let editingOriginalDate = null;
+let targetDate = null;
+let dtMode = 'normal';
+let selectorOpenKey = null;
+let adminOpenKey = null;
+let armedDeleteId = null;
+let armedDeleteTimer = null;
+
+/* ============ FECHAS (hora local, nunca UTC) ============ */
+function pad2(n) { return String(n).padStart(2, '0'); }
+
+function localISO(d) {
+  return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+}
+
+function todayLocal() { return localISO(new Date()); }
+
+function shiftDays(iso, n) {
+  const p = iso.split('-').map(Number);
+  const d = new Date(p[0], p[1] - 1, p[2]);
+  d.setDate(d.getDate() + n);
+  return localISO(d);
+}
+
+function formatDate(iso) {
+  const p = iso.split('-');
+  return Number(p[2]) + ' de ' + MONTHS[Number(p[1]) - 1] + ' de ' + p[0];
+}
+
+function formatShort(iso) {
+  const p = iso.split('-');
+  return Number(p[2]) + ' de ' + MONTHS[Number(p[1]) - 1];
+}
+
+function monthKey(iso) { return iso.slice(0, 7); }
+
+function monthLabel(key) {
+  const p = key.split('-');
+  return MONTHS[Number(p[1]) - 1] + ' ' + p[0];
+}
+
+function dayWord(iso) {
+  const t = todayLocal();
+  if (iso === t) return 'hoy';
+  if (iso === shiftDays(t, -1)) return 'ayer';
+  return null;
+}
+
+/* ============ DATOS ============ */
+async function dbFetch(path, opts = {}) {
+  const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, {
+    ...opts,
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation',
+      ...(opts.headers || {})
+    }
+  });
+  const text = await res.text();
+  if (!res.ok) {
+    const err = new Error(text || ('HTTP ' + res.status));
+    err.status = res.status;
+    throw err;
+  }
+  return text ? JSON.parse(text) : [];
+}
+
+async function reload() {
+  letters = await dbFetch('cartas?select=*&order=date.asc,created_at.asc');
+}
+
+async function load() {
+  try {
+    await reload();
+  } catch (e) {
+    letters = [];
+    showReaderMessage('No se pudieron cargar las cartas. Revisa la conexión y vuelve a entrar.');
+    return;
+  }
+  if (!letters.length) {
+    showReaderMessage('Todavía no hay ninguna carta aquí.');
+    return;
+  }
+  currentIdx = letters.length - 1;
+  updateEnvelope();
+}
+
+/* ============ AGRUPACION POR MES Y POR DIA ============ */
+function groupByMonth(list) {
+  const map = new Map();
+  list.forEach(function (l) {
+    const k = monthKey(l.date);
+    if (!map.has(k)) map.set(k, []);
+    map.get(k).push(l);
+  });
+  return Array.from(map.entries())
+    .sort(function (a, b) { return b[0].localeCompare(a[0]); })
+    .map(function (e) { return { key: e[0], label: monthLabel(e[0]), items: e[1] }; });
+}
+
+function groupByDay(items) {
+  const map = new Map();
+  items.forEach(function (l) {
+    if (!map.has(l.date)) map.set(l.date, []);
+    map.get(l.date).push(l);
+  });
+  return Array.from(map.entries())
+    .sort(function (a, b) { return b[0].localeCompare(a[0]); })
+    .map(function (e) { return { date: e[0], items: e[1] }; });
+}
+
+function sameDayLetters(date) {
+  return letters.filter(function (l) { return l.date === date; });
+}
+
+/* ============ ACORDEON (compartido lector + panel) ============ */
+function el(tag, cls, text) {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text != null) n.textContent = text;
+  return n;
+}
+
+function preview(l) {
+  const s = (l.body || '').replace(/\s+/g, ' ').trim();
+  return s.length > 60 ? s.slice(0, 60) + '…' : s;
+}
+
+function buildRow(l, meta, opts) {
+  const row = el('div', 'sel-item' + (opts.isCurrent && opts.isCurrent(l) ? ' current' : ''));
+  const main = el('button', 'sel-main');
+  main.type = 'button';
+  main.appendChild(el('span', 'sel-dot'));
+  if (meta.date) main.appendChild(el('span', 'sel-date', meta.date));
+  if (meta.ord) main.appendChild(el('span', 'sel-ord', meta.ord));
+  main.appendChild(el('span', 'sel-preview', preview(l)));
+  main.addEventListener('click', function () { opts.onPick(l); });
+  row.appendChild(main);
+
+  if (opts.withDelete) {
+    const d = el('button', 'letter-item-del', '✕');
+    d.type = 'button';
+    d.setAttribute('aria-label', 'Borrar la carta del ' + formatShort(l.date));
+    d.addEventListener('click', function (ev) { ev.stopPropagation(); armDelete(l, d); });
+    row.appendChild(d);
+  }
+  return row;
+}
+
+function buildAccordion(container, opts) {
+  container.innerHTML = '';
+  if (!letters.length) {
+    container.appendChild(el('div', 'acc-empty', 'Aún no hay cartas guardadas.'));
+    return;
+  }
+
+  const months = groupByMonth(letters);
+  let openKey = opts.openKey;
+  if (!months.some(function (m) { return m.key === openKey; })) openKey = months[0].key;
+
+  months.forEach(function (m) {
+    const group = el('div', 'month-group' + (m.key === openKey ? ' open' : ''));
+    group.dataset.key = m.key;
+
+    const head = el('button', 'month-head');
+    head.type = 'button';
+    head.setAttribute('aria-expanded', m.key === openKey ? 'true' : 'false');
+    head.appendChild(el('span', 'month-caret', '›'));
+    head.appendChild(el('span', 'month-name', m.label));
+    head.appendChild(el('span', 'month-count', m.items.length === 1 ? '1 carta' : m.items.length + ' cartas'));
+    head.addEventListener('click', function () {
+      const wasOpen = group.classList.contains('open');
+      container.querySelectorAll('.month-group').forEach(function (g) {
+        g.classList.remove('open');
+        g.querySelector('.month-head').setAttribute('aria-expanded', 'false');
+      });
+      if (wasOpen) {
+        if (opts.onOpenChange) opts.onOpenChange(null);
+      } else {
+        group.classList.add('open');
+        head.setAttribute('aria-expanded', 'true');
+        if (opts.onOpenChange) opts.onOpenChange(m.key);
+      }
+    });
+    group.appendChild(head);
+
+    const body = el('div', 'month-body');
+    groupByDay(m.items).forEach(function (day) {
+      if (day.items.length === 1) {
+        body.appendChild(buildRow(day.items[0], { date: formatShort(day.date) }, opts));
+      } else {
+        const wrap = el('div', 'day-multi');
+        const dh = el('div', 'day-multi-head');
+        dh.appendChild(el('span', 'day-multi-date', formatShort(day.date)));
+        dh.appendChild(el('span', 'day-badge', day.items.length + ' cartas'));
+        wrap.appendChild(dh);
+        day.items.forEach(function (l, i) {
+          wrap.appendChild(buildRow(l, { ord: 'carta ' + (i + 1) }, opts));
+        });
+        body.appendChild(wrap);
+      }
+    });
+    group.appendChild(body);
+    container.appendChild(group);
+  });
+}
+
+/* ============ LECTOR ============ */
+function showReaderMessage(msg) {
+  const box = document.getElementById('reader-empty');
+  box.textContent = msg;
+  box.style.display = 'block';
+  document.getElementById('envelope').style.display = 'none';
+  document.getElementById('letter-paper').classList.remove('open');
+  document.getElementById('letter-nav').style.display = 'none';
+  document.getElementById('day-pills').classList.remove('visible');
+  document.getElementById('ver-todas-wrap').style.display = 'none';
+}
+
+function hideReaderMessage() {
+  document.getElementById('reader-empty').style.display = 'none';
+}
+
+function showReader() {
+  document.getElementById('admin').style.display = 'none';
+  document.getElementById('admin').classList.remove('active');
+  document.getElementById('reader').style.display = 'flex';
+  document.getElementById('reader').classList.add('active');
+  if (!letters.length) {
+    showReaderMessage('Todavía no hay ninguna carta aquí.');
+    return;
+  }
+  currentIdx = letters.length - 1;
+  updateEnvelope();
+}
+
+function updateEnvelope() {
+  const l = letters[currentIdx];
+  if (!l) return;
+  hideReaderMessage();
+  typewriterGen++;
+  finishTypewriter = null;
+
+  document.getElementById('env-date').textContent = formatDate(l.date).toUpperCase();
+  document.getElementById('env-hint').textContent = dayWord(l.date) === 'hoy'
+    ? 'Haz clic para abrir tu carta de hoy ✦'
+    : 'Haz clic para abrir la carta del ' + formatShort(l.date) + ' ✦';
+
+  const sameDay = sameDayLetters(l.date);
+  const em = document.getElementById('env-multi');
+  if (sameDay.length > 1) {
+    em.textContent = sameDay.length + ' cartas este día';
+    em.style.display = 'block';
+  } else {
+    em.style.display = 'none';
+  }
+
+  document.getElementById('letter-paper').classList.remove('open');
+  document.getElementById('letter-nav').style.display = 'none';
+  document.getElementById('day-pills').classList.remove('visible');
+  document.getElementById('envelope').style.display = '';
+  document.getElementById('ver-todas-wrap').style.display = letters.length > 1 ? 'block' : 'none';
+}
+
+function updateDayPills() {
+  const wrap = document.getElementById('day-pills');
+  wrap.innerHTML = '';
+  const cur = letters[currentIdx];
+  if (!cur) { wrap.classList.remove('visible'); return; }
+
+  const sameDay = sameDayLetters(cur.date);
+  if (sameDay.length < 2) { wrap.classList.remove('visible'); return; }
+
+  wrap.appendChild(el('span', 'day-pills-label', sameDay.length + ' cartas este día'));
+  sameDay.forEach(function (l, i) {
+    const b = el('button', 'day-pill' + (l === cur ? ' active' : ''), String(i + 1));
+    b.type = 'button';
+    b.setAttribute('aria-label', 'Carta ' + (i + 1) + ' del ' + formatShort(l.date));
+    b.addEventListener('click', function () {
+      currentIdx = letters.indexOf(l);
+      renderLetterContent();
+    });
+    wrap.appendChild(b);
+  });
+  wrap.classList.add('visible');
+}
+
+function renderLetterContent() {
+  const l = letters[currentIdx];
+  if (!l) return;
+  hideReaderMessage();
+
+  document.getElementById('envelope').style.display = 'none';
+  document.getElementById('letter-date').textContent = formatDate(l.date).toUpperCase();
+  document.getElementById('letter-salutation').textContent = l.salutation || '';
+  document.getElementById('letter-paper').classList.add('open');
+
+  const bodyEl = document.getElementById('letter-body');
+  const closingEl = document.getElementById('letter-closing');
+  const sigEl = document.getElementById('letter-signature');
+  const hintEl = document.getElementById('skip-hint');
+
+  // el cierre y la firma quedan escritos pero invisibles hasta el final
+  closingEl.textContent = l.closing || '';
+  sigEl.textContent = l.signature || '';
+  closingEl.classList.remove('in');
+  sigEl.classList.remove('in');
+
+  const text = l.body || '';
+  const gen = ++typewriterGen;
+  finishTypewriter = null;
+
+  function revealOutro() {
+    hintEl.classList.add('gone');
+    closingEl.classList.add('in');
+    setTimeout(function () {
+      if (gen === typewriterGen || RM) sigEl.classList.add('in');
+    }, RM ? 0 : 800);
+  }
+
+  if (RM) {
+    bodyEl.textContent = text;
+    revealOutro();
+  } else {
+    bodyEl.textContent = '';
+    hintEl.classList.remove('gone');
+    let i = 0;
+
+    finishTypewriter = function () {
+      if (gen !== typewriterGen) return;
+      typewriterGen++;
+      finishTypewriter = null;
+      bodyEl.textContent = text;
+      hintEl.classList.add('gone');
+      closingEl.classList.add('in');
+      sigEl.classList.add('in');
+    };
+
+    (function type() {
+      if (gen !== typewriterGen) return;
+      if (i < text.length) {
+        const ch = text[i];
+        bodyEl.textContent += ch;
+        i++;
+        setTimeout(type, ch === '\n' ? 90 : Math.random() * 35 + 18);
+      } else {
+        finishTypewriter = null;
+        setTimeout(function () { if (gen === typewriterGen) revealOutro(); }, 650);
+      }
+    })();
+  }
+
+  updateDayPills();
+  if (letters.length > 1) {
+    document.getElementById('letter-nav').style.display = 'flex';
+    document.getElementById('ver-todas-wrap').style.display = 'block';
+    updateNav();
+  }
+}
+
+function openEnvelope() {
+  renderLetterContent();
+}
+
+function openLetterDirect(idx) {
+  currentIdx = idx;
+  closeLetterSelector();
+  renderLetterContent();
+}
+
+function openLetterSelector() {
+  const cur = letters[currentIdx];
+  if (cur) selectorOpenKey = monthKey(cur.date);
+  renderSelector();
+  document.getElementById('letter-selector').style.display = 'flex';
+  const c = document.querySelector('#selector-list .sel-item.current');
+  if (c) c.scrollIntoView({ block: 'center' });
+}
+
+function closeLetterSelector() {
+  document.getElementById('letter-selector').style.display = 'none';
+}
+
+function renderSelector() {
+  buildAccordion(document.getElementById('selector-list'), {
+    openKey: selectorOpenKey,
+    isCurrent: function (l) { return l === letters[currentIdx]; },
+    onOpenChange: function (k) { selectorOpenKey = k; },
+    onPick: function (l) { openLetterDirect(letters.indexOf(l)); }
+  });
+}
+
+function updateNav() {
+  document.getElementById('btn-prev').disabled = currentIdx === 0;
+  document.getElementById('btn-next').disabled = currentIdx === letters.length - 1;
+  document.getElementById('nav-count').textContent = 'carta ' + (currentIdx + 1) + ' de ' + letters.length;
+}
+
+function prevLetter() { if (currentIdx > 0) { currentIdx--; renderLetterContent(); } }
+function nextLetter() { if (currentIdx < letters.length - 1) { currentIdx++; renderLetterContent(); } }
+
+function goToReader() { showReader(); }
+
+/* ============ PANEL: FECHA DESTINO ============ */
+function initDateTarget() {
+  const h = new Date().getHours();
+  const t = todayLocal();
+  if (h >= 1 && h < 4) {
+    dtMode = 'madrugada';
+    targetDate = shiftDays(t, -1);
+  } else if (h >= 4 && h < 7) {
+    dtMode = 'temprano';
+    targetDate = t;
+  } else {
+    dtMode = 'normal';
+    targetDate = t;
+  }
+  document.getElementById('dt-custom-wrap').classList.remove('visible');
+  renderDateTarget();
+}
+
+function renderDateTarget() {
+  const t = todayLocal();
+  const y = shiftDays(t, -1);
+  const opts = document.getElementById('dt-opts');
+  const stat = document.getElementById('dt-static');
+  const alert = document.getElementById('dt-alert');
+  const change = document.getElementById('dt-change');
+  opts.innerHTML = '';
+
+  if (editingId) {
+    opts.style.display = 'none';
+    stat.style.display = 'block';
+    stat.textContent = formatDate(targetDate);
+    change.style.display = 'inline-block';
+    if (editingOriginalDate && targetDate !== editingOriginalDate) {
+      alert.textContent = 'Vas a mover esta carta del ' + formatShort(editingOriginalDate) +
+        ' al ' + formatShort(targetDate) + '. El texto no cambia, solo la fecha.';
+      alert.classList.add('visible');
+    } else {
+      alert.classList.remove('visible');
+    }
+    return;
+  }
+  change.style.display = 'inline-block';
+
+  if (dtMode === 'madrugada' || dtMode === 'temprano') {
+    opts.style.display = 'flex';
+    stat.style.display = 'none';
+    [['hoy, ' + formatShort(t), t], ['ayer, ' + formatShort(y), y]].forEach(function (pair) {
+      const b = el('button', 'dt-opt' + (targetDate === pair[1] ? ' active' : ''), pair[0]);
+      b.type = 'button';
+      b.addEventListener('click', function () { targetDate = pair[1]; renderDateTarget(); });
+      opts.appendChild(b);
+    });
+  } else {
+    opts.style.display = 'none';
+    stat.style.display = 'block';
+    const w = dayWord(targetDate);
+    stat.textContent = w ? w + ', ' + formatShort(targetDate) : formatDate(targetDate);
+  }
+
+  const now = new Date();
+  const hhmm = pad2(now.getHours()) + ':' + pad2(now.getMinutes());
+
+  if (targetDate !== t) {
+    alert.textContent = dtMode === 'madrugada'
+      ? 'Son las ' + hhmm + ' de la madrugada. Esta carta se va a guardar para AYER, ' + formatShort(targetDate) + '. Toca "hoy" si prefieres que quede con la fecha de hoy.'
+      : 'Atención: esta carta NO se guardará con la fecha de hoy. Va a quedar como la carta del ' + formatShort(targetDate) + '.';
+    alert.classList.add('visible');
+  } else if (dtMode === 'temprano') {
+    alert.textContent = 'Son las ' + hhmm + '. ¿Esta carta es de anoche? Puedes guardarla para ayer, ' + formatShort(y) + '.';
+    alert.classList.add('visible');
+  } else {
+    alert.classList.remove('visible');
+  }
+}
+
+function toggleCustomDate() {
+  const w = document.getElementById('dt-custom-wrap');
+  w.classList.toggle('visible');
+  if (w.classList.contains('visible')) {
+    const inp = document.getElementById('dt-custom');
+    inp.value = targetDate;
+    inp.focus();
+  }
+}
+
+function pickCustomDate(v) {
+  if (!v) return;
+  targetDate = v;
+  renderDateTarget();
+}
+
+/* ============ PANEL: GUARDAR / EDITAR / BORRAR ============ */
+async function saveLetter() {
+  const sal = document.getElementById('f-salutation').value.trim();
+  const body = document.getElementById('f-body').value.trim();
+  const closing = document.getElementById('f-closing').value.trim();
+  const sig = document.getElementById('f-signature').value.trim();
+  if (!body) { showToast('Escribe algo en la carta ✦'); return; }
+  if (!targetDate) targetDate = todayLocal();
+
+  const payload = { date: targetDate, salutation: sal, body: body, closing: closing, signature: sig };
+  const btn = document.getElementById('btn-save');
+  const wasEdit = editingId;
+  const movedFrom = (wasEdit && editingOriginalDate && editingOriginalDate !== targetDate)
+    ? editingOriginalDate : null;
+  const saved = targetDate;
+  btn.disabled = true;
+
+  try {
+    if (wasEdit) {
+      await dbFetch('cartas?id=eq.' + wasEdit, { method: 'PATCH', body: JSON.stringify(payload) });
+    } else {
+      await dbFetch('cartas', { method: 'POST', body: JSON.stringify(payload) });
+    }
+    await reload();
+    adminOpenKey = monthKey(saved);
+    exitEditMode();
+    // tras editar, la fecha destino vuelve al valor por defecto:
+    // si no, la siguiente carta nueva heredaria la fecha de la carta editada
+    if (wasEdit) initDateTarget();
+    renderLettersList();
+    document.getElementById('f-body').value = '';
+
+    if (movedFrom) {
+      showToast('Movida del ' + formatShort(movedFrom) + ' al ' + formatShort(saved) + ' ✦');
+    } else if (wasEdit) {
+      showToast('Cambios guardados ✦');
+    } else {
+      const w = dayWord(saved);
+      const n = sameDayLetters(saved).length;
+      if (w !== 'hoy') {
+        showToast('Guardada para ' + (w ? w + ', ' : 'el ') + formatShort(saved) + ' ✦');
+      } else if (n > 1) {
+        showToast('Guardada. Es la carta ' + n + ' de hoy ✦');
+      } else {
+        showToast('¡Carta guardada con amor! ✦');
+      }
+    }
+  } catch (e) {
+    const m = String(e.message || '');
+    if (m.indexOf('23505') !== -1 || /duplicate key/i.test(m)) {
+      showToast('La base de datos no deja 2 cartas el mismo día');
+    } else {
+      showToast('Error al guardar. Intenta de nuevo.');
+    }
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function armDelete(l, btn) {
+  if (armedDeleteId === l.id) {
+    clearTimeout(armedDeleteTimer);
+    armedDeleteId = null;
+    deleteLetter(l);
+    return;
+  }
+  clearTimeout(armedDeleteTimer);
+  document.querySelectorAll('.letter-item-del.armed').forEach(function (b) {
+    b.classList.remove('armed');
+    b.textContent = '✕';
+  });
+  armedDeleteId = l.id;
+  btn.classList.add('armed');
+  btn.textContent = '¿seguro?';
+  armedDeleteTimer = setTimeout(function () {
+    armedDeleteId = null;
+    btn.classList.remove('armed');
+    btn.textContent = '✕';
+  }, 3500);
+}
+
+async function deleteLetter(l) {
+  try {
+    await dbFetch('cartas?id=eq.' + l.id, { method: 'DELETE' });
+    if (editingId === l.id) cancelEdit();
+    await reload();
+    renderLettersList();
+    showToast('Carta eliminada');
+  } catch (e) {
+    showToast('Error al eliminar.');
+  }
+}
+
+function editLetter(l) {
+  editingId = l.id;
+  editingOriginalDate = l.date;
+  targetDate = l.date;
+  document.getElementById('dt-custom-wrap').classList.remove('visible');
+  document.getElementById('f-salutation').value = l.salutation || '';
+  document.getElementById('f-body').value = l.body || '';
+  document.getElementById('f-closing').value = l.closing || '';
+  document.getElementById('f-signature').value = l.signature || '';
+  document.getElementById('write-title').textContent = 'Editar carta';
+  document.getElementById('btn-save').textContent = 'Guardar cambios ✦';
+
+  const same = sameDayLetters(l.date);
+  const pos = same.indexOf(l) + 1;
+  document.getElementById('edit-banner-text').textContent = same.length > 1
+    ? 'Editando la carta ' + pos + ' del ' + formatShort(l.date)
+    : 'Editando la carta del ' + formatShort(l.date);
+  document.getElementById('edit-banner').classList.add('visible');
+
+  renderDateTarget();
+  renderLettersList();
+  window.scrollTo({ top: 0, behavior: RM ? 'auto' : 'smooth' });
+  document.getElementById('f-body').focus();
+}
+
+function exitEditMode() {
+  editingId = null;
+  editingOriginalDate = null;
+  document.getElementById('edit-banner').classList.remove('visible');
+  document.getElementById('write-title').textContent = 'Escribir carta';
+  document.getElementById('btn-save').textContent = 'Guardar carta ✦';
+}
+
+function cancelEdit() {
+  exitEditMode();
+  document.getElementById('f-salutation').value = 'Mi reina hermosa,';
+  document.getElementById('f-body').value = '';
+  document.getElementById('f-closing').value = 'Con todo mi amor,';
+  document.getElementById('f-signature').value = 'Tu amor';
+  initDateTarget();
+  renderLettersList();
+}
+
+function showAdmin() {
+  document.getElementById('reader').style.display = 'none';
+  document.getElementById('reader').classList.remove('active');
+  document.getElementById('admin').style.display = 'flex';
+  document.getElementById('admin').classList.add('active');
+  typewriterGen++;
+  finishTypewriter = null;
+  exitEditMode();
+  initDateTarget();
+  if (!adminOpenKey) adminOpenKey = monthKey(todayLocal());
+  renderLettersList();
+}
+
+function renderLettersList() {
+  buildAccordion(document.getElementById('letters-list'), {
+    openKey: adminOpenKey || monthKey(todayLocal()),
+    isCurrent: function (l) { return editingId != null && l.id === editingId; },
+    onOpenChange: function (k) { adminOpenKey = k; },
+    onPick: function (l) { editLetter(l); },
+    withDelete: true
+  });
+}
+
+/* ============ ENTRADA / EVENTOS ============ */
+document.getElementById('paper').addEventListener('click', function () {
+  if (finishTypewriter) finishTypewriter();
+});
+
+document.getElementById('envelope').addEventListener('keydown', function (e) {
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openEnvelope(); }
+});
+
+document.getElementById('secret-zone').addEventListener('click', () => {
+  secretClicks++;
+  clearTimeout(secretTimer);
+  secretTimer = setTimeout(() => { secretClicks = 0; }, 2000);
+  if (secretClicks >= 5) {
+    secretClicks = 0;
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('login-screen').classList.remove('hidden');
+  }
+});
+
+function tryLogin() {
+  const val = document.getElementById('pwd-input').value;
+  if (val === ADMIN_PASSWORD) {
+    document.getElementById('login-screen').classList.add('hidden');
+    setTimeout(() => { document.getElementById('login-screen').style.display = 'none'; }, 400);
+    document.getElementById('pwd-input').value = '';
+    document.getElementById('login-err').textContent = '';
+    showAdmin();
+  } else {
+    document.getElementById('login-err').textContent = 'Contraseña incorrecta, mi amor...';
+    document.getElementById('pwd-input').value = '';
+  }
+}
+
+document.getElementById('pwd-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') tryLogin();
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeLetterSelector();
+});
+
+document.getElementById('login-screen').style.display = 'none';
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+load();
+</script>
+</body>
+</html>
