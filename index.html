@@ -662,6 +662,19 @@
   }
   .btn-ver-todas:hover { background: var(--rose-faint); border-color: var(--rose); }
 
+  #ver-todas-wrap {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .btn-ver-favs.btn-ver-todas {
+    border-color: var(--rose);
+    background: var(--rose-faint);
+  }
+  .btn-ver-favs.btn-ver-todas:hover { background: var(--rose); color: #fff; }
+
   #letter-selector {
     position: fixed;
     inset: 0;
@@ -1105,6 +1118,148 @@
     text-transform: uppercase;
   }
 
+  /* ============ FAVORITAS (lector) ============ */
+  .fav-row {
+    display: none;
+    justify-content: center;
+    margin-top: 1.1rem;
+  }
+  .fav-row.visible { display: flex; }
+
+  .btn-fav {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    background: var(--cream);
+    border: 0.5px solid var(--gold-light);
+    border-radius: 2px;
+    padding: 9px 18px;
+    cursor: pointer;
+    font-family: 'Special Elite', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--ink-light);
+    transition: border-color 0.25s, color 0.25s, background 0.25s;
+  }
+  .btn-fav:hover { border-color: var(--rose); color: var(--rose); }
+  .btn-fav:focus-visible { outline: 1px solid var(--rose); outline-offset: 2px; }
+  .btn-fav.on {
+    color: var(--rose);
+    border-color: var(--rose-light);
+    background: var(--rose-faint);
+  }
+
+  .fav-heart {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 3;
+    flex-shrink: 0;
+    transition: fill 0.25s ease, transform 0.3s cubic-bezier(0.16,1,0.3,1);
+  }
+  .btn-fav.on .fav-heart { fill: var(--rose); stroke: var(--rose); }
+  .btn-fav.pop .fav-heart { transform: scale(1.35); }
+
+  .fav-mark {
+    color: var(--rose);
+    font-size: 11px;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .month-group.fav-group .month-head { color: var(--rose); }
+  .month-group.fav-group .month-count { color: var(--rose); }
+
+  /* ============ FAVORITAS (panel) ============ */
+  .fav-count {
+    font-family: 'Special Elite', monospace;
+    font-size: 9.5px;
+    letter-spacing: 1.5px;
+    color: var(--rose);
+    border: 0.5px solid var(--rose-light);
+    background: var(--rose-faint);
+    border-radius: 2px;
+    padding: 2px 7px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+
+  .fav-new-row {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    background: var(--rose-faint);
+    border-left: 2px solid var(--rose);
+    border-radius: 0 2px 2px 0;
+    padding: 0.7rem 1rem;
+    margin-bottom: 1rem;
+  }
+  .fav-new-row.visible { display: flex; }
+
+  .fav-new-badge {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 1rem;
+    color: #8a3f38;
+  }
+
+  .fav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 0.5px solid rgba(184,151,74,0.16);
+  }
+  .fav-item:last-child { border-bottom: none; }
+  .fav-item.nuevo { background: rgba(196,115,106,0.07); }
+
+  .fav-when {
+    font-family: 'Special Elite', monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .fav-nota {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 0.95rem;
+    color: var(--ink-light);
+    padding: 0 0 10px 24px;
+    border-bottom: 0.5px solid rgba(184,151,74,0.16);
+  }
+
+  .fav-setup {
+    display: none;
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 0.95rem;
+    color: var(--ink-light);
+    line-height: 1.6;
+  }
+  .fav-setup.visible { display: block; }
+
+  .fav-setup code {
+    display: block;
+    font-family: 'Special Elite', monospace;
+    font-style: normal;
+    font-size: 11px;
+    line-height: 1.7;
+    background: var(--cream-dark);
+    border: 0.5px solid var(--gold-light);
+    border-radius: 2px;
+    padding: 0.8rem 1rem;
+    margin-top: 0.7rem;
+    white-space: pre;
+    overflow-x: auto;
+    color: var(--ink);
+  }
+
   /* ============ MOVIL ============ */
   @media (max-width: 640px) {
     #reader { padding: 2rem 0.8rem 3rem; }
@@ -1297,6 +1452,15 @@
       <div class="skip-hint" id="skip-hint">Toca la carta para leerla completa</div>
     </div>
 
+    <div class="fav-row" id="fav-row">
+      <button class="btn-fav" id="btn-fav" aria-pressed="false" onclick="toggleCurrentFav()">
+        <svg class="fav-heart" viewBox="0 0 44 44" width="15" height="15" aria-hidden="true">
+          <path d="M22 38 C22 38 4 26 4 14 C4 8 8.5 4 13.5 4 C17 4 20 6 22 9 C24 6 27 4 30.5 4 C35.5 4 40 8 40 14 C40 26 22 38 22 38Z"/>
+        </svg>
+        <span class="fav-label">Guardar esta carta</span>
+      </button>
+    </div>
+
     <div class="day-pills" id="day-pills"></div>
 
     <div class="letter-nav" id="letter-nav" style="display:none;">
@@ -1307,6 +1471,7 @@
 
     <div id="ver-todas-wrap" style="display:none; text-align:center; margin-top:1rem;">
       <button class="btn-ver-todas" onclick="openLetterSelector()">✦ Ver todas las cartas</button>
+      <button class="btn-ver-todas btn-ver-favs" id="btn-ver-favs" style="display:none;" onclick="openFavSelector()">♥ Tus favoritas</button>
     </div>
   </div>
 </div>
@@ -1371,6 +1536,16 @@
       <button class="btn-save" id="btn-save" onclick="saveLetter()">Guardar carta ✦</button>
     </div>
 
+    <div class="panel-card" id="fav-panel">
+      <h3>Lo que más le gustó <span class="fav-count" id="fav-count"></span></h3>
+      <div class="fav-new-row" id="fav-new-row">
+        <span class="fav-new-badge" id="fav-new-badge"></span>
+        <button class="btn-cancel-edit" onclick="markFavsSeen()">Ya las vi</button>
+      </div>
+      <div id="fav-list"></div>
+      <div class="fav-setup" id="fav-setup"></div>
+    </div>
+
     <div class="panel-card">
       <h3>Cartas guardadas</h3>
       <div id="letters-list" class="acc acc-inline"></div>
@@ -1404,6 +1579,18 @@ let selectorOpenKey = null;
 let adminOpenKey = null;
 let armedDeleteId = null;
 let armedDeleteTimer = null;
+let favs = new Map();
+let favsAvailable = false;
+let favPopTimer = null;
+
+const FAVS_SEEN_KEY = 'cartas-favs-vistas';
+const FAVS_SQL = 'create table if not exists favoritas (\n' +
+  '  id         uuid primary key default gen_random_uuid(),\n' +
+  '  carta_id   uuid not null references cartas(id) on delete cascade,\n' +
+  '  nota       text,\n' +
+  '  created_at timestamptz not null default now(),\n' +
+  '  constraint favoritas_carta_unica unique (carta_id)\n' +
+  ');';
 
 /* ============ FECHAS (hora local, nunca UTC) ============ */
 function pad2(n) { return String(n).padStart(2, '0'); }
@@ -1468,6 +1655,132 @@ async function dbFetch(path, opts = {}) {
 
 async function reload() {
   letters = await dbFetch('cartas?select=*&order=date.asc,created_at.asc');
+  await reloadFavs();
+}
+
+/* Las favoritas nunca tumban la pagina: si la tabla no existe todavia,
+   la funcion se apaga sola y las cartas siguen funcionando igual. */
+async function reloadFavs() {
+  try {
+    const rows = await dbFetch('favoritas?select=*');
+    favs = new Map(rows.map(function (r) { return [r.carta_id, r]; }));
+    favsAvailable = true;
+  } catch (e) {
+    favs = new Map();
+    favsAvailable = false;
+  }
+}
+
+function isFav(l) { return !!(l && favs.has(l.id)); }
+
+function favTime(l) {
+  const f = favs.get(l.id);
+  return (f && f.created_at) || '';
+}
+
+function favSorted() {
+  return letters.filter(isFav).sort(function (a, b) {
+    return favTime(b).localeCompare(favTime(a));
+  });
+}
+
+function favWhen(iso) {
+  if (!iso) return '';
+  const marcada = new Date(iso);
+  if (isNaN(marcada.getTime())) return '';
+  const dias = Math.floor((new Date(todayLocal() + 'T12:00:00') - new Date(localISO(marcada) + 'T12:00:00')) / 86400000);
+  if (dias <= 0) return 'marcada hoy';
+  if (dias === 1) return 'marcada ayer';
+  if (dias < 30) return 'hace ' + dias + ' días';
+  return 'marcada el ' + formatShort(localISO(marcada));
+}
+
+function favsSeenAt() {
+  try { return localStorage.getItem(FAVS_SEEN_KEY) || ''; } catch (e) { return ''; }
+}
+
+function markFavsSeen() {
+  try { localStorage.setItem(FAVS_SEEN_KEY, new Date().toISOString()); } catch (e) { /* modo privado */ }
+  renderFavPanel();
+}
+
+function favsNuevas() {
+  const seen = favsSeenAt();
+  // sin marca de "visto" todas cuentan como nuevas: si no, el aviso no
+  // aparece nunca y el boton que lo arregla solo sale con el aviso
+  return favSorted().filter(function (l) { return !seen || favTime(l) > seen; });
+}
+
+async function toggleCurrentFav() {
+  const l = letters[currentIdx];
+  if (l) await toggleFav(l);
+}
+
+async function toggleFav(l) {
+  if (!favsAvailable) {
+    await reloadFavs();
+    if (!favsAvailable) { showToast('Los favoritos aún no están activos'); return; }
+  }
+
+  const estaba = favs.has(l.id);
+  // optimista: la marca responde al instante y se revierte si falla
+  const anterior = favs.get(l.id);
+  if (estaba) favs.delete(l.id);
+  else favs.set(l.id, { carta_id: l.id, created_at: new Date().toISOString() });
+  updateFavUI(!estaba);
+
+  try {
+    if (estaba) {
+      await dbFetch('favoritas?carta_id=eq.' + l.id, { method: 'DELETE' });
+      showToast('Quitada de tus favoritas');
+    } else {
+      const saved = await dbFetch('favoritas', { method: 'POST', body: JSON.stringify({ carta_id: l.id }) });
+      if (Array.isArray(saved) && saved[0]) favs.set(l.id, saved[0]);
+      showToast('Guardada en tus favoritas ✦');
+    }
+  } catch (e) {
+    const m = String(e.message || '');
+    if (!estaba && (m.indexOf('23505') !== -1 || /duplicate key/i.test(m))) {
+      // ya estaba marcada en el servidor: resincroniza en vez de fallar
+      await reloadFavs();
+      showToast('Ya estaba en tus favoritas ✦');
+    } else {
+      if (estaba && anterior) favs.set(l.id, anterior);
+      else favs.delete(l.id);
+      showToast('No se pudo guardar. Revisa la conexión.');
+    }
+  }
+  updateFavUI(false);
+}
+
+function updateFavUI(pop) {
+  const l = letters[currentIdx];
+  const btn = document.getElementById('btn-fav');
+  const abierta = document.getElementById('letter-paper').classList.contains('open');
+
+  document.getElementById('fav-row').classList.toggle('visible', !!(favsAvailable && l && abierta));
+  if (l) {
+    const on = isFav(l);
+    btn.classList.toggle('on', on);
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    btn.querySelector('.fav-label').textContent = on ? 'Guardada' : 'Guardar esta carta';
+    if (pop) {
+      btn.classList.add('pop');
+      clearTimeout(favPopTimer);
+      favPopTimer = setTimeout(function () { btn.classList.remove('pop'); }, 320);
+    }
+  }
+
+  const verFavs = document.getElementById('btn-ver-favs');
+  const n = favSorted().length;
+  if (favsAvailable && n) {
+    verFavs.textContent = '♥ Tus favoritas · ' + n;
+    verFavs.style.display = 'inline-block';
+  } else {
+    verFavs.style.display = 'none';
+  }
+
+  if (document.getElementById('letter-selector').style.display === 'flex') renderSelector();
 }
 
 async function load() {
@@ -1532,6 +1845,7 @@ function buildRow(l, meta, opts) {
   const main = el('button', 'sel-main');
   main.type = 'button';
   main.appendChild(el('span', 'sel-dot'));
+  if (isFav(l)) main.appendChild(el('span', 'fav-mark', '♥'));
   if (meta.date) main.appendChild(el('span', 'sel-date', meta.date));
   if (meta.ord) main.appendChild(el('span', 'sel-ord', meta.ord));
   main.appendChild(el('span', 'sel-preview', preview(l)));
@@ -1555,19 +1869,27 @@ function buildAccordion(container, opts) {
     return;
   }
 
-  const months = groupByMonth(letters);
-  let openKey = opts.openKey;
-  if (!months.some(function (m) { return m.key === openKey; })) openKey = months[0].key;
+  const groups = [];
+  if (opts.favGroup && favsAvailable) {
+    const favItems = favSorted();
+    if (favItems.length) {
+      groups.push({ key: '__favs', label: 'tus favoritas', items: favItems, fav: true });
+    }
+  }
+  groupByMonth(letters).forEach(function (m) { groups.push(m); });
 
-  months.forEach(function (m) {
-    const group = el('div', 'month-group' + (m.key === openKey ? ' open' : ''));
+  let openKey = opts.openKey;
+  if (!groups.some(function (g) { return g.key === openKey; })) openKey = groups[0].key;
+
+  groups.forEach(function (m) {
+    const group = el('div', 'month-group' + (m.key === openKey ? ' open' : '') + (m.fav ? ' fav-group' : ''));
     group.dataset.key = m.key;
 
     const head = el('button', 'month-head');
     head.type = 'button';
     head.setAttribute('aria-expanded', m.key === openKey ? 'true' : 'false');
     head.appendChild(el('span', 'month-caret', '›'));
-    head.appendChild(el('span', 'month-name', m.label));
+    head.appendChild(el('span', 'month-name', (m.fav ? '♥ ' : '') + m.label));
     head.appendChild(el('span', 'month-count', m.items.length === 1 ? '1 carta' : m.items.length + ' cartas'));
     head.addEventListener('click', function () {
       const wasOpen = group.classList.contains('open');
@@ -1586,6 +1908,17 @@ function buildAccordion(container, opts) {
     group.appendChild(head);
 
     const body = el('div', 'month-body');
+
+    // el grupo de favoritas es una lista plana: las cartas vienen de meses distintos
+    if (m.fav) {
+      m.items.forEach(function (l) {
+        body.appendChild(buildRow(l, { date: formatShort(l.date) }, opts));
+      });
+      group.appendChild(body);
+      container.appendChild(group);
+      return;
+    }
+
     groupByDay(m.items).forEach(function (day) {
       if (day.items.length === 1) {
         body.appendChild(buildRow(day.items[0], { date: formatShort(day.date) }, opts));
@@ -1660,7 +1993,8 @@ function updateEnvelope() {
   document.getElementById('letter-nav').style.display = 'none';
   document.getElementById('day-pills').classList.remove('visible');
   document.getElementById('envelope').style.display = '';
-  document.getElementById('ver-todas-wrap').style.display = letters.length > 1 ? 'block' : 'none';
+  document.getElementById('ver-todas-wrap').style.display = letters.length > 1 ? 'flex' : 'none';
+  updateFavUI(false);
 }
 
 function updateDayPills() {
@@ -1752,9 +2086,10 @@ function renderLetterContent() {
   }
 
   updateDayPills();
+  updateFavUI(false);
   if (letters.length > 1) {
     document.getElementById('letter-nav').style.display = 'flex';
-    document.getElementById('ver-todas-wrap').style.display = 'block';
+    document.getElementById('ver-todas-wrap').style.display = 'flex';
     updateNav();
   }
 }
@@ -1772,6 +2107,16 @@ function openLetterDirect(idx) {
 function openLetterSelector() {
   const cur = letters[currentIdx];
   if (cur) selectorOpenKey = monthKey(cur.date);
+  showSelector();
+}
+
+// atajo para volver rapido a las cartas que marco
+function openFavSelector() {
+  selectorOpenKey = '__favs';
+  showSelector();
+}
+
+function showSelector() {
   renderSelector();
   document.getElementById('letter-selector').style.display = 'flex';
   const c = document.querySelector('#selector-list .sel-item.current');
@@ -1785,6 +2130,7 @@ function closeLetterSelector() {
 function renderSelector() {
   buildAccordion(document.getElementById('selector-list'), {
     openKey: selectorOpenKey,
+    favGroup: true,
     isCurrent: function (l) { return l === letters[currentIdx]; },
     onOpenChange: function (k) { selectorOpenKey = k; },
     onPick: function (l) { openLetterDirect(letters.indexOf(l)); }
@@ -1922,6 +2268,7 @@ async function saveLetter() {
     // tras editar, la fecha destino vuelve al valor por defecto:
     // si no, la siguiente carta nueva heredaria la fecha de la carta editada
     if (wasEdit) initDateTarget();
+    renderFavPanel();
     renderLettersList();
     document.getElementById('f-body').value = '';
 
@@ -1979,6 +2326,7 @@ async function deleteLetter(l) {
     await dbFetch('cartas?id=eq.' + l.id, { method: 'DELETE' });
     if (editingId === l.id) cancelEdit();
     await reload();
+    renderFavPanel();
     renderLettersList();
     showToast('Carta eliminada');
   } catch (e) {
@@ -2039,7 +2387,59 @@ function showAdmin() {
   exitEditMode();
   initDateTarget();
   if (!adminOpenKey) adminOpenKey = monthKey(todayLocal());
+  renderFavPanel();
   renderLettersList();
+}
+
+function renderFavPanel() {
+  const list = document.getElementById('fav-list');
+  const setup = document.getElementById('fav-setup');
+  const count = document.getElementById('fav-count');
+  const newRow = document.getElementById('fav-new-row');
+  list.innerHTML = '';
+  count.textContent = '';
+  newRow.classList.remove('visible');
+
+  if (!favsAvailable) {
+    setup.textContent = 'La tabla "favoritas" todavía no existe en Supabase. Créala con esto y la sección se activa sola:';
+    setup.appendChild(el('code', null, FAVS_SQL));
+    setup.classList.add('visible');
+    return;
+  }
+  setup.classList.remove('visible');
+  setup.textContent = '';
+
+  const items = favSorted();
+  if (!items.length) {
+    list.appendChild(el('div', 'acc-empty', 'Todavía no ha marcado ninguna carta.'));
+    return;
+  }
+  count.textContent = String(items.length);
+
+  const nuevas = favsNuevas();
+  if (nuevas.length) {
+    document.getElementById('fav-new-badge').textContent = nuevas.length === 1
+      ? 'Marcó 1 carta nueva'
+      : 'Marcó ' + nuevas.length + ' cartas nuevas';
+    newRow.classList.add('visible');
+  }
+
+  items.forEach(function (l) {
+    const esNueva = nuevas.indexOf(l) !== -1;
+    const row = el('div', 'fav-item' + (esNueva ? ' nuevo' : ''));
+    const main = el('button', 'sel-main');
+    main.type = 'button';
+    main.appendChild(el('span', 'fav-mark', '♥'));
+    main.appendChild(el('span', 'sel-date', formatShort(l.date)));
+    main.appendChild(el('span', 'sel-preview', preview(l)));
+    main.addEventListener('click', function () { editLetter(l); });
+    row.appendChild(main);
+    row.appendChild(el('span', 'fav-when', favWhen(favTime(l))));
+    list.appendChild(row);
+
+    const f = favs.get(l.id);
+    if (f && f.nota) list.appendChild(el('div', 'fav-nota', '“' + f.nota + '”'));
+  });
 }
 
 function renderLettersList() {
