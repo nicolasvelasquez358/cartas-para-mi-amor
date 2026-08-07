@@ -1747,7 +1747,14 @@ async function toggleFav(l) {
     } else {
       if (estaba && anterior) favs.set(l.id, anterior);
       else favs.delete(l.id);
-      showToast('No se pudo guardar. Revisa la conexión.');
+      // RLS activo sin policies: el GET devuelve vacio sin error y solo
+      // falla al escribir, asi que hay que nombrarlo o se busca donde no es
+      if (e.status === 401 || e.status === 403 || m.indexOf('42501') !== -1 ||
+          /row-level security|permission denied/i.test(m)) {
+        showToast('Falta permiso en la tabla favoritas (RLS)');
+      } else {
+        showToast('No se pudo guardar. Revisa la conexión.');
+      }
     }
   }
   updateFavUI(false);
