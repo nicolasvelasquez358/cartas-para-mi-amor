@@ -20,6 +20,8 @@
     --gold: #b8974a;
     --gold-light: #e8d8a8;
     --paper-shadow: rgba(44,31,14,0.12);
+    --verde: #6b7a52;
+    --verde-faint: #eef0e6;
   }
 
   body {
@@ -1260,6 +1262,130 @@
     color: var(--ink);
   }
 
+  /* ============ ACUSE DE LECTURA ============ */
+  .vista-mark {
+    font-family: 'Special Elite', monospace;
+    font-size: 11px;
+    line-height: 1;
+    flex-shrink: 0;
+    width: 12px;
+    text-align: center;
+  }
+  .vista-mark.si { color: var(--verde); }
+  .vista-mark.no { color: var(--ink-faint); opacity: 0.55; }
+
+  .lec-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 0;
+    border-bottom: 0.5px solid rgba(184,151,74,0.16);
+  }
+  .lec-item:last-child { border-bottom: none; }
+  .lec-item.sin-leer { background: rgba(184,151,74,0.06); }
+
+  .lec-estado {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Special Elite', monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .lec-estado.si { color: var(--verde); }
+  .lec-estado.no { color: var(--ink-faint); }
+
+  .lec-veces {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 0.85rem;
+    color: var(--verde);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .lec-borrar {
+    background: none;
+    border: none;
+    color: var(--gold-light);
+    cursor: pointer;
+    font-size: 11px;
+    padding: 2px 4px;
+    flex-shrink: 0;
+    transition: color 0.2s;
+  }
+  .lec-borrar:hover { color: var(--rose); }
+  .lec-borrar.armed {
+    color: var(--rose);
+    font-family: 'Special Elite', monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .lec-resumen {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    background: rgba(184,151,74,0.1);
+    border-left: 2px solid var(--gold);
+    border-radius: 0 2px 2px 0;
+    padding: 0.7rem 1rem;
+    margin-bottom: 1rem;
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 1rem;
+    color: var(--ink);
+  }
+  .lec-resumen.visible { display: flex; }
+  .lec-resumen.todo-leido {
+    background: var(--verde-faint);
+    border-left-color: var(--verde);
+    color: #4a5638;
+  }
+
+  .dispositivo-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-top: 1.2rem;
+    padding-top: 1rem;
+    border-top: 0.5px solid var(--gold-light);
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 0.95rem;
+    color: var(--ink-light);
+    line-height: 1.5;
+  }
+
+  .btn-dispositivo {
+    font-family: 'Special Elite', monospace;
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    background: none;
+    border: 0.5px solid var(--ink-faint);
+    color: var(--ink-faint);
+    padding: 6px 12px;
+    border-radius: 2px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+  .btn-dispositivo:hover { color: var(--ink); border-color: var(--ink); }
+  .btn-dispositivo.on {
+    color: var(--verde);
+    border-color: var(--verde);
+    background: var(--verde-faint);
+  }
+
   /* ============ MOVIL ============ */
   @media (max-width: 640px) {
     #reader { padding: 2rem 0.8rem 3rem; }
@@ -1536,6 +1662,17 @@
       <button class="btn-save" id="btn-save" onclick="saveLetter()">Guardar carta ✦</button>
     </div>
 
+    <div class="panel-card" id="lec-panel">
+      <h3>¿Ya las leyó?</h3>
+      <div class="lec-resumen" id="lec-resumen"></div>
+      <div id="lec-list"></div>
+      <div class="fav-setup" id="lec-setup"></div>
+      <div class="dispositivo-row">
+        <span id="dispositivo-texto"></span>
+        <button class="btn-dispositivo" id="btn-dispositivo" onclick="toggleDispositivo()"></button>
+      </div>
+    </div>
+
     <div class="panel-card" id="fav-panel">
       <h3>Lo que más le gustó <span class="fav-count" id="fav-count"></span></h3>
       <div class="fav-new-row" id="fav-new-row">
@@ -1583,7 +1720,21 @@ let favs = new Map();
 let favsAvailable = false;
 let favPopTimer = null;
 
+let vistasAll = [];
+let vistasAvailable = false;
+let vistasDeEstaSesion = new Set();
+let armedLecId = null;
+let armedLecTimer = null;
+
 const FAVS_SEEN_KEY = 'cartas-favs-vistas';
+const DISPOSITIVO_MIO_KEY = 'cartas-este-dispositivo-es-mio';
+const VISTAS_SQL = [
+  'create table if not exists vistas (',
+  '  id       uuid primary key default gen_random_uuid(),',
+  '  carta_id uuid not null references cartas(id) on delete cascade,',
+  '  vista_at timestamptz not null default now()',
+  ');'
+].join(String.fromCharCode(10));
 const FAVS_SQL = 'create table if not exists favoritas (\n' +
   '  id         uuid primary key default gen_random_uuid(),\n' +
   '  carta_id   uuid not null references cartas(id) on delete cascade,\n' +
@@ -1656,6 +1807,7 @@ async function dbFetch(path, opts = {}) {
 async function reload() {
   letters = await dbFetch('cartas?select=*&order=date.asc,created_at.asc');
   await reloadFavs();
+  await reloadVistas();
 }
 
 /* Las favoritas nunca tumban la pagina: si la tabla no existe todavia,
@@ -1669,6 +1821,97 @@ async function reloadFavs() {
     favs = new Map();
     favsAvailable = false;
   }
+}
+
+/* ============ ACUSE DE LECTURA ============ */
+
+/* El navegador donde se entra al panel queda marcado como el de Nicolas y
+   deja de registrar lecturas. Sin esto, revisar una carta la marcaria como
+   leida por ella y el acuse no valdria nada. */
+function soyAdmin() {
+  try { return localStorage.getItem(DISPOSITIVO_MIO_KEY) === '1'; } catch (e) { return false; }
+}
+
+function marcarDispositivoComoMio() {
+  try { localStorage.setItem(DISPOSITIVO_MIO_KEY, '1'); } catch (e) { /* modo privado */ }
+}
+
+function toggleDispositivo() {
+  try {
+    if (soyAdmin()) localStorage.removeItem(DISPOSITIVO_MIO_KEY);
+    else localStorage.setItem(DISPOSITIVO_MIO_KEY, '1');
+  } catch (e) { showToast('Este navegador no deja guardar la preferencia'); }
+  renderDispositivo();
+}
+
+function renderDispositivo() {
+  const mio = soyAdmin();
+  const txt = document.getElementById('dispositivo-texto');
+  const btn = document.getElementById('btn-dispositivo');
+  if (!txt || !btn) return;
+  txt.textContent = mio
+    ? 'Este navegador está marcado como tuyo: lo que abras aquí no cuenta como leído.'
+    : 'Este navegador NO está marcado como tuyo: lo que abras aquí contará como leído por ella.';
+  btn.textContent = mio ? 'Es el mío' : 'No es el mío';
+  btn.classList.toggle('on', mio);
+  btn.setAttribute('aria-pressed', mio ? 'true' : 'false');
+}
+
+async function reloadVistas() {
+  try {
+    vistasAll = await dbFetch('vistas?select=*&order=vista_at.asc');
+    vistasAvailable = true;
+  } catch (e) {
+    vistasAll = [];
+    vistasAvailable = false;
+  }
+}
+
+function lecturaDe(l) {
+  if (!l) return null;
+  const filas = vistasAll.filter(function (v) { return v.carta_id === l.id; });
+  if (!filas.length) return null;
+  return {
+    veces: filas.length,
+    primera: filas[0].vista_at,
+    ultima: filas[filas.length - 1].vista_at,
+    ids: filas.map(function (v) { return v.id; })
+  };
+}
+
+function fueVista(l) { return !!lecturaDe(l); }
+
+function sinLeer() {
+  return letters.filter(function (l) { return !fueVista(l); });
+}
+
+/* Registra la lectura sin bloquear: si falla, ella no se entera de nada
+   y la carta se lee igual. */
+async function registrarVista(l) {
+  if (!l || !vistasAvailable || soyAdmin()) return;
+  if (vistasDeEstaSesion.has(l.id)) return;
+  vistasDeEstaSesion.add(l.id);
+  try {
+    const saved = await dbFetch('vistas', { method: 'POST', body: JSON.stringify({ carta_id: l.id }) });
+    if (Array.isArray(saved) && saved[0]) vistasAll.push(saved[0]);
+  } catch (e) {
+    vistasDeEstaSesion.delete(l.id);
+  }
+}
+
+function haceCuanto(iso) {
+  if (!iso) return '';
+  const t = new Date(iso).getTime();
+  if (isNaN(t)) return '';
+  const min = Math.floor((Date.now() - t) / 60000);
+  if (min < 1) return 'ahora mismo';
+  if (min < 60) return 'hace ' + min + ' min';
+  const h = Math.floor(min / 60);
+  if (h < 24) return 'hace ' + h + (h === 1 ? ' hora' : ' horas');
+  const d = Math.floor(h / 24);
+  if (d === 1) return 'ayer';
+  if (d < 30) return 'hace ' + d + ' días';
+  return 'el ' + formatShort(localISO(new Date(iso)));
 }
 
 function isFav(l) { return !!(l && favs.has(l.id)); }
@@ -1852,6 +2095,12 @@ function buildRow(l, meta, opts) {
   const main = el('button', 'sel-main');
   main.type = 'button';
   main.appendChild(el('span', 'sel-dot'));
+  if (opts.withVista && vistasAvailable) {
+    const vista = fueVista(l);
+    const m = el('span', 'vista-mark ' + (vista ? 'si' : 'no'), vista ? '✓' : '○');
+    m.title = vista ? 'Ella ya la leyó' : 'Todavía sin leer';
+    main.appendChild(m);
+  }
   if (isFav(l)) main.appendChild(el('span', 'fav-mark', '♥'));
   if (meta.date) main.appendChild(el('span', 'sel-date', meta.date));
   if (meta.ord) main.appendChild(el('span', 'sel-ord', meta.ord));
@@ -2094,6 +2343,7 @@ function renderLetterContent() {
 
   updateDayPills();
   updateFavUI(false);
+  registrarVista(l);
   if (letters.length > 1) {
     document.getElementById('letter-nav').style.display = 'flex';
     document.getElementById('ver-todas-wrap').style.display = 'flex';
@@ -2275,6 +2525,7 @@ async function saveLetter() {
     // tras editar, la fecha destino vuelve al valor por defecto:
     // si no, la siguiente carta nueva heredaria la fecha de la carta editada
     if (wasEdit) initDateTarget();
+    renderLecPanel();
     renderFavPanel();
     renderLettersList();
     document.getElementById('f-body').value = '';
@@ -2333,6 +2584,7 @@ async function deleteLetter(l) {
     await dbFetch('cartas?id=eq.' + l.id, { method: 'DELETE' });
     if (editingId === l.id) cancelEdit();
     await reload();
+    renderLecPanel();
     renderFavPanel();
     renderLettersList();
     showToast('Carta eliminada');
@@ -2394,8 +2646,109 @@ function showAdmin() {
   exitEditMode();
   initDateTarget();
   if (!adminOpenKey) adminOpenKey = monthKey(todayLocal());
+  renderLecPanel();
   renderFavPanel();
   renderLettersList();
+}
+
+function renderLecPanel() {
+  const list = document.getElementById('lec-list');
+  const setup = document.getElementById('lec-setup');
+  const resumen = document.getElementById('lec-resumen');
+  list.innerHTML = '';
+  resumen.classList.remove('visible', 'todo-leido');
+  renderDispositivo();
+
+  if (!vistasAvailable) {
+    setup.textContent = 'La tabla "vistas" todavía no existe en Supabase. Créala con esto y la sección se activa sola:';
+    setup.appendChild(el('code', null, VISTAS_SQL));
+    setup.classList.add('visible');
+    return;
+  }
+  setup.classList.remove('visible');
+  setup.textContent = '';
+
+  if (!letters.length) {
+    list.appendChild(el('div', 'acc-empty', 'Todavía no hay cartas.'));
+    return;
+  }
+
+  const pendientes = sinLeer();
+  if (pendientes.length) {
+    resumen.textContent = pendientes.length === 1
+      ? 'Le queda 1 carta sin leer: la del ' + formatShort(pendientes[pendientes.length - 1].date) + '.'
+      : 'Le quedan ' + pendientes.length + ' cartas sin leer.';
+    resumen.classList.add('visible');
+  } else {
+    resumen.textContent = 'Las ha leído todas.';
+    resumen.classList.add('visible', 'todo-leido');
+  }
+
+  // las mas recientes primero: es lo que se mira despues de escribir
+  const recientes = letters.slice().reverse().slice(0, 8);
+  recientes.forEach(function (l) {
+    const lec = lecturaDe(l);
+    const row = el('div', 'lec-item' + (lec ? '' : ' sin-leer'));
+
+    const main = el('button', 'sel-main');
+    main.type = 'button';
+    main.appendChild(el('span', 'vista-mark ' + (lec ? 'si' : 'no'), lec ? '✓' : '○'));
+    main.appendChild(el('span', 'sel-date', formatShort(l.date)));
+    main.appendChild(el('span', 'sel-preview', preview(l)));
+    main.addEventListener('click', function () { editLetter(l); });
+    row.appendChild(main);
+
+    if (lec && lec.veces > 1) {
+      row.appendChild(el('span', 'lec-veces', lec.veces + ' veces'));
+    }
+    row.appendChild(el('span', 'lec-estado ' + (lec ? 'si' : 'no'),
+      lec ? haceCuanto(lec.ultima) : 'sin leer'));
+
+    if (lec) {
+      const b = el('button', 'lec-borrar', '✕');
+      b.type = 'button';
+      b.title = 'Borrar esta lectura (si la abriste tú)';
+      b.setAttribute('aria-label', 'Borrar la lectura de la carta del ' + formatShort(l.date));
+      b.addEventListener('click', function (ev) { ev.stopPropagation(); armLecDelete(l, lec, b); });
+      row.appendChild(b);
+    }
+    list.appendChild(row);
+  });
+}
+
+function armLecDelete(l, lec, btn) {
+  if (armedLecId === l.id) {
+    clearTimeout(armedLecTimer);
+    armedLecId = null;
+    borrarLectura(l, lec);
+    return;
+  }
+  clearTimeout(armedLecTimer);
+  document.querySelectorAll('.lec-borrar.armed').forEach(function (b) {
+    b.classList.remove('armed');
+    b.textContent = '✕';
+  });
+  armedLecId = l.id;
+  btn.classList.add('armed');
+  btn.textContent = '¿seguro?';
+  armedLecTimer = setTimeout(function () {
+    armedLecId = null;
+    btn.classList.remove('armed');
+    btn.textContent = '✕';
+  }, 3500);
+}
+
+async function borrarLectura(l, lec) {
+  try {
+    await dbFetch('vistas?carta_id=eq.' + l.id, { method: 'DELETE' });
+    vistasAll = vistasAll.filter(function (v) { return v.carta_id !== l.id; });
+    vistasDeEstaSesion.delete(l.id);
+    renderLecPanel();
+    renderLettersList();
+    showToast('Lectura borrada');
+  } catch (e) {
+    showToast('No se pudo borrar la lectura');
+  }
 }
 
 function renderFavPanel() {
@@ -2455,7 +2808,8 @@ function renderLettersList() {
     isCurrent: function (l) { return editingId != null && l.id === editingId; },
     onOpenChange: function (k) { adminOpenKey = k; },
     onPick: function (l) { editLetter(l); },
-    withDelete: true
+    withDelete: true,
+    withVista: true
   });
 }
 
@@ -2486,6 +2840,7 @@ function tryLogin() {
     setTimeout(() => { document.getElementById('login-screen').style.display = 'none'; }, 400);
     document.getElementById('pwd-input').value = '';
     document.getElementById('login-err').textContent = '';
+    marcarDispositivoComoMio();
     showAdmin();
   } else {
     document.getElementById('login-err').textContent = 'Contraseña incorrecta, mi amor...';
